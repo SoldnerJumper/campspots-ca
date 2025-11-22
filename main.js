@@ -1,4 +1,4 @@
-// main.js — use GeoJSON geometry directly, open vs closed
+// main.js — campsites only (DEFINED_CAMPSITES > 0), open vs closed
 
 // 1. Initialize the map centered roughly on BC
 const map = L.map("map").setView([53.7267, -127.6476], 5);
@@ -8,7 +8,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
 
-// Helper to get a property with optional fallback names (case-insensitive)
+// 2. Helper to get a property with optional fallback names (case-insensitive)
 function getField(props, names) {
   if (!props) return undefined;
   const keys = Object.keys(props);
@@ -29,7 +29,7 @@ function getField(props, names) {
   return undefined;
 }
 
-// Closed if CLOSURE_IND / CLOSR_IND == 'Y'
+// 3. Closed if CLOSURE_IND / CLOSR_IND == "Y"
 function isClosed(featureOrProps) {
   const props =
     featureOrProps && featureOrProps.properties
@@ -41,6 +41,23 @@ function isClosed(featureOrProps) {
   return String(ind).trim().toUpperCase() === "Y";
 }
 
+// 4. Campsite if DEFINED_CAMPSITES / DFND_CAMP > 0
+function isCampsite(featureOrProps) {
+  const props =
+    featureOrProps && featureOrProps.properties
+      ? featureOrProps.properties
+      : featureOrProps;
+
+  let n = getField(props, ["DEFINED_CAMPSITES", "DFND_CAMP"]);
+  if (n === undefined || n === null) return false;
+
+  if (typeof n === "string") n = parseFloat(n);
+  if (Number.isNaN(n)) return false;
+
+  return n > 0;
+}
+
+// 5. Format closure date nicely if possible
 function formatClosureDate(value) {
   if (!value) return "";
   const asString = String(value);
@@ -55,31 +72,8 @@ function formatClosureDate(value) {
   return d.toLocaleDateString();
 }
 
-// A feature is a campsite if DEFINED_CAMPSITES (or DFND_CAMP) > 0
-function isCampsite(featureOrProps) {
-  const props =
-    featureOrProps && featureOrProps.properties
-      ? featureOrProps.properties
-      : featureOrProps;
-
-  let n = getField(props, ["DEFINED_CAMPSITES", "DFND_CAMP"]);
-  if (n === undefined || n === null) return false;
-
-  if (typeof n === "string") {
-    n = parseFloat(n);
-  }
-  if (Number.isNaN(n)) return false;
-
-  return n > 0;
-}
-
-// Layers for open / closed
+// 6. Layers for open / closed campsites (no filters here; we filter before addData)
 const openLayer = L.geoJSON(null, {
-  // OLD:
-  // filter: (feature) => !isClosed(feature),
-
-  // NEW:
-  filter: (feature) => isCampsite(feature) && !isClosed(feature),
   pointToLayer: (feature, latlng) =>
     L.circleMarker(latlng, {
       radius: 6,
@@ -93,11 +87,6 @@ const openLayer = L.geoJSON(null, {
 });
 
 const closedLayer = L.geoJSON(null, {
-  // OLD:
-  // filter: (feature) => isClosed(feature),
-
-  // NEW:
-  filter: (feature) => isCampsite(feature) && isClosed(feature),
   pointToLayer: (feature, latlng) =>
     L.circleMarker(latlng, {
       radius: 6,
@@ -110,6 +99,7 @@ const closedLayer = L.geoJSON(null, {
   onEachFeature: onEachFeature,
 });
 
+// 7. Popup content
 function onEachFeature(feature, layer) {
   const props = feature.properties || {};
 
@@ -177,8 +167,7 @@ function onEachFeature(feature, layer) {
   layer.bindPopup(popupHtml);
 }
 
-// --- Load GeoJSON using the raw GitHub URL instead of Pages ---
-
+// 8. Load GeoJSON (using raw GitHub URL to avoid Pages truncation)
 const DATA_URL =
   "https://raw.githubusercontent.com/soldnerjumper/campspots-ca/main/data/FTEN_REC_DTAILS_CLOSURES_SV.geojson";
 
@@ -195,13 +184,19 @@ fetch(DATA_URL)
       return;
     }
 
-    console.log("Feature count:", data.features.length);
-    if (data.features.length > 0) {
-      console.log("Sample properties:", data.features[0].properties);
+    const allFeatures = data.features;
+    const campsiteFeatures = allFeatures.filter(isCampsite);
+    const openFeatures = campsiteFeatures.filter((f) => !isClosed(f));
+    const closedFeatures = campsiteFeatures.filter((f) => isClosed(f));
+
+    console.log("Total features:", allFeatures.length);
+    console.log("Campsites (DEFINED_CAMPSITES > 0):", campsiteFeatures.length);
+    if (campsiteFeatures.length > 0) {
+      console.log("Sample campsite properties:", campsiteFeatures[0].properties);
     }
 
-    openLayer.addData(data);
-    closedLayer.addData(data);
+    openLayer.addData(openFeatures);
+    closedLayer.addData(closedFeatures);
 
     openLayer.addTo(map);
     closedLayer.addTo(map);
@@ -217,9 +212,7 @@ fetch(DATA_URL)
     console.error("Error loading GeoJSON", err);
   });
 
-
-// --- Hook up the checkboxes ---
-
+// 9. Hook up the checkboxes
 const showOpenCheckbox = document.getElementById("showFree");
 const showClosedCheckbox = document.getElementById("showPaid");
 
