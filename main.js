@@ -1,4 +1,4 @@
-// main.js — use GeoJSON geometry directly (WGS84) and robust field handling
+// main.js — use GeoJSON geometry directly, open vs closed
 
 // 1. Initialize the map centered roughly on BC
 const map = L.map("map").setView([53.7267, -127.6476], 5);
@@ -8,7 +8,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
 
-// Helper to get a field in a case-insensitive way
+// Helper to get a property with optional fallback names (case-insensitive)
 function getField(props, names) {
   if (!props) return undefined;
   const keys = Object.keys(props);
@@ -17,7 +17,7 @@ function getField(props, names) {
     if (props[name] !== undefined && props[name] !== null) {
       return props[name];
     }
-    // case-insensitive match
+    // case-insensitive fallback
     const lower = name.toLowerCase();
     for (const key of keys) {
       if (key.toLowerCase() === lower) {
@@ -29,7 +29,7 @@ function getField(props, names) {
   return undefined;
 }
 
-// Closed if CLOSURE_IND / CLOSR_IND == 'Y' (case-insensitive)
+// Closed if CLOSURE_IND / CLOSR_IND == 'Y'
 function isClosed(featureOrProps) {
   const props =
     featureOrProps && featureOrProps.properties
@@ -38,7 +38,6 @@ function isClosed(featureOrProps) {
 
   const ind = getField(props, ["CLOSURE_IND", "CLOSR_IND"]);
   if (ind === undefined || ind === null) return false;
-
   return String(ind).trim().toUpperCase() === "Y";
 }
 
@@ -100,7 +99,8 @@ function onEachFeature(feature, layer) {
   const closed = isClosed(props);
   const closureType = getField(props, ["CLOSURE_TYPE", "CLOSR_TYPE"]) || "";
   const closureDate = getField(props, ["CLOSURE_DATE", "CLOSR_DT"]) || "";
-  const closureComment = getField(props, ["CLOSURE_COMMENT", "CLOSR_COM"]) || "";
+  const closureComment =
+    getField(props, ["CLOSURE_COMMENT", "CLOSR_COM"]) || "";
 
   let statusHtml = closed
     ? "<strong>Status: CLOSED</strong><br/>"
@@ -151,7 +151,7 @@ function onEachFeature(feature, layer) {
   layer.bindPopup(popupHtml);
 }
 
-// --- Load GeoJSON using the relative path ---
+// --- Load GeoJSON using the file that actually has data ---
 
 fetch("data/FTEN_REC_DTAILS_CLOSURES_SV.geojson")
   .then((res) => {
