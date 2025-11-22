@@ -1,4 +1,4 @@
-// main.js
+// main.js — uses LATITUDE / LONGITUDE fields directly
 
 // 1. Initialize the map centered roughly on BC
 const map = L.map("map").setView([53.7267, -127.6476], 5);
@@ -8,28 +8,18 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
 
-// --- Helpers based on your schema ---
-
+// Helper to safely get properties
 function getProps(feature) {
   return feature && feature.properties ? feature.properties : {};
 }
 
-// Treat anything with DEFINED_CAMPSITES > 0 as an actual campsite
-function isCampsite(feature) {
-  const props = getProps(feature);
-  let n = props.DEFINED_CAMPSITES ?? props.DFND_CAMP;
-
-  if (typeof n === "string") {
-    const parsed = Number(n);
-    if (!Number.isNaN(parsed)) n = parsed;
-  }
-
-  return typeof n === "number" && n > 0;
-}
-
 // Closed if CLOSURE_IND (or CLOSR_IND) == 'Y'
-function isClosed(feature) {
-  const props = getProps(feature);
+function isClosed(featureOrProps) {
+  const props =
+    featureOrProps && featureOrProps.properties
+      ? featureOrProps.properties
+      : featureOrProps;
+
   const ind =
     (props.CLOSURE_IND || props.CLOSR_IND || "").toString().trim().toUpperCase();
   return ind === "Y";
@@ -53,41 +43,12 @@ function formatClosureDate(value) {
   return d.toLocaleDateString();
 }
 
-// --- Layers: open vs closed campsites ---
+// Layers for open / closed sites
+const openLayer = L.layerGroup();
+const closedLayer = L.layerGroup();
 
-const openLayer = L.geoJSON(null, {
-  filter: (feature) => isCampsite(feature) && !isClosed(feature),
-  pointToLayer: (feature, latlng) =>
-    L.circleMarker(latlng, {
-      radius: 6,
-      weight: 1,
-      opacity: 1,
-      fillOpacity: 0.9,
-      color: "#15803d",     // outline (green-ish)
-      fillColor: "#22c55e", // fill
-    }),
-  onEachFeature: onEachCampsite,
-});
-
-const closedLayer = L.geoJSON(null, {
-  filter: (feature) => isCampsite(feature) && isClosed(feature),
-  pointToLayer: (feature, latlng) =>
-    L.circleMarker(latlng, {
-      radius: 6,
-      weight: 1,
-      opacity: 1,
-      fillOpacity: 0.9,
-      color: "#b91c1c",     // outline (red-ish)
-      fillColor: "#ef4444", // fill
-    }),
-  onEachFeature: onEachCampsite,
-});
-
-// --- Popup content with official links ---
-
-function onEachCampsite(feature, layer) {
-  const props = getProps(feature);
-
+// Create popup HTML
+function buildPopupHtml(props, closed) {
   const name =
     props.PROJECT_NAME ||
     props.PROJECT_NM ||
@@ -98,7 +59,6 @@ function onEachCampsite(feature, layer) {
   const description = props.SITE_DESCRIPTION || props.ST_DESC || "";
   const directions = props.DRIVING_DIRECTIONS || props.DRV_DIRCTN || "";
 
-  const closed = isClosed(feature);
   const closureType = props.CLOSURE_TYPE || props.CLOSR_TYPE || "";
   const closureDate = props.CLOSURE_DATE || props.CLOSR_DT || "";
   const closureComment = props.CLOSURE_COMMENT || props.CLOSR_COM || "";
@@ -130,7 +90,7 @@ function onEachCampsite(feature, layer) {
     ? `<br/><strong>Directions:</strong> ${directions}`
     : "";
 
-  // Build official page links based on FOREST_FILE_ID (e.g. REC5810)
+  // Official links based on FOREST_FILE_ID (e.g. REC5810)
   const forestId = props.FOREST_FILE_ID || props.F_FILE_ID;
   let officialLinksHtml = "";
   if (forestId) {
@@ -144,7 +104,7 @@ function onEachCampsite(feature, layer) {
     `;
   }
 
-  const popupHtml = `
+  return `
     <strong>${name}</strong><br/>
     ${statusHtml}
     ${campsiteHtml}
@@ -153,27 +113,86 @@ function onEachCampsite(feature, layer) {
     ${dirHtml}
     ${officialLinksHtml}
   `;
-
-  layer.bindPopup(popupHtml);
 }
 
-// --- Load your uploaded GeoJSON ---
+// --- Load your uploaded GeoJSON and build markers from LAT/LON ---
 
 fetch("data/bc_rec_sites.geojson")
-  .then((res) => res.json())
+  .then((res) => {
+    if (!res.ok) {
+      console.error("Failed to load GeoJSON:", res.status, res.statusText);
+    }
+    return res.json();
+  })
   .then((data) => {
-    openLayer.addData(data);
-    closedLayer.addData(data);
+    if (!data || !Array.isArray(data.features)) {
+      console.error("Invalid GeoJSON structure", data);
+      return;
+    }
 
-    // Show both by default
+    console.log("Feature count:", data.features.length);
+
+    const bounds = L.latLngBounds();
+
+    data.features.forEach((feature) => {
+      const props = getProps(feature);
+
+      let lat = props.LATITUDE;
+      let lng = props.LONGITUDE;
+
+      // Convert to numbers if strings
+      lat = typeof lat === "string" ? parseFloat(lat) : lat;
+      lng = typeof lng === "string" ? parseFloat(lng) : lng;
+
+      if (
+        typeof lat !== "number" ||
+        Number.isNaN(lat) ||
+        typeof lng !== "number" ||
+        Number.isNaN(lng)
+      ) {
+        return; // skip if coordinates missing
+      }
+
+      const closed = isClosed(props);
+
+      const style = closed
+        ? {
+            radius: 6,
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.9,
+            color: "#b91c1c",
+            fillColor: "#ef4444",
+          }
+        : {
+            radius: 6,
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.9,
+            color: "#15803d",
+            fillColor: "#22c55e",
+          };
+
+      const marker = L.circleMarker([lat, lng], style);
+      marker.bindPopup(buildPopupHtml(props, closed));
+
+      if (closed) {
+        closedLayer.addLayer(marker);
+      } else {
+        openLayer.addLayer(marker);
+      }
+
+      bounds.extend([lat, lng]);
+    });
+
+    // Add both layers and fit map
     openLayer.addTo(map);
     closedLayer.addTo(map);
 
-    const group = L.featureGroup([openLayer, closedLayer]);
-    try {
-      map.fitBounds(group.getBounds(), { padding: [20, 20] });
-    } catch (e) {
-      console.warn("Could not fit bounds (maybe no features?)", e);
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [20, 20] });
+    } else {
+      console.warn("No valid coordinates to fit bounds");
     }
   })
   .catch((err) => {
@@ -182,7 +201,6 @@ fetch("data/bc_rec_sites.geojson")
 
 // --- Hook up the checkboxes ---
 
-// Note: IDs are showFree/showPaid, but labels say "open/closed"
 const showOpenCheckbox = document.getElementById("showFree");
 const showClosedCheckbox = document.getElementById("showPaid");
 
