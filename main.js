@@ -55,9 +55,31 @@ function formatClosureDate(value) {
   return d.toLocaleDateString();
 }
 
+// A feature is a campsite if DEFINED_CAMPSITES (or DFND_CAMP) > 0
+function isCampsite(featureOrProps) {
+  const props =
+    featureOrProps && featureOrProps.properties
+      ? featureOrProps.properties
+      : featureOrProps;
+
+  let n = getField(props, ["DEFINED_CAMPSITES", "DFND_CAMP"]);
+  if (n === undefined || n === null) return false;
+
+  if (typeof n === "string") {
+    n = parseFloat(n);
+  }
+  if (Number.isNaN(n)) return false;
+
+  return n > 0;
+}
+
 // Layers for open / closed
 const openLayer = L.geoJSON(null, {
-  filter: (feature) => !isClosed(feature),
+  // OLD:
+  // filter: (feature) => !isClosed(feature),
+
+  // NEW:
+  filter: (feature) => isCampsite(feature) && !isClosed(feature),
   pointToLayer: (feature, latlng) =>
     L.circleMarker(latlng, {
       radius: 6,
@@ -71,7 +93,11 @@ const openLayer = L.geoJSON(null, {
 });
 
 const closedLayer = L.geoJSON(null, {
-  filter: (feature) => isClosed(feature),
+  // OLD:
+  // filter: (feature) => isClosed(feature),
+
+  // NEW:
+  filter: (feature) => isCampsite(feature) && isClosed(feature),
   pointToLayer: (feature, latlng) =>
     L.circleMarker(latlng, {
       radius: 6,
