@@ -1,4 +1,4 @@
-// main.js — uses LATITUDE / LONGITUDE fields directly
+// main.js — use GeoJSON geometry directly (WGS84) and robust field handling
 
 // 1. Initialize the map centered roughly on BC
 const map = L.map("map").setView([53.7267, -127.6476], 5);
@@ -8,75 +8,108 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
 
-// Helper to safely get properties
-function getProps(feature) {
-  return feature && feature.properties ? feature.properties : {};
+// Helper to get a field in a case-insensitive way
+function getField(props, names) {
+  if (!props) return undefined;
+  const keys = Object.keys(props);
+  for (const name of names) {
+    // exact match first
+    if (props[name] !== undefined && props[name] !== null) {
+      return props[name];
+    }
+    // case-insensitive match
+    const lower = name.toLowerCase();
+    for (const key of keys) {
+      if (key.toLowerCase() === lower) {
+        const val = props[key];
+        if (val !== undefined && val !== null) return val;
+      }
+    }
+  }
+  return undefined;
 }
 
-// Closed if CLOSURE_IND (or CLOSR_IND) == 'Y'
+// Closed if CLOSURE_IND / CLOSR_IND == 'Y' (case-insensitive)
 function isClosed(featureOrProps) {
   const props =
     featureOrProps && featureOrProps.properties
       ? featureOrProps.properties
       : featureOrProps;
 
-  const ind =
-    (props.CLOSURE_IND || props.CLOSR_IND || "").toString().trim().toUpperCase();
-  return ind === "Y";
+  const ind = getField(props, ["CLOSURE_IND", "CLOSR_IND"]);
+  if (ind === undefined || ind === null) return false;
+
+  return String(ind).trim().toUpperCase() === "Y";
 }
 
-// Try to make a human-friendly date from closure date field
 function formatClosureDate(value) {
   if (!value) return "";
   const asString = String(value);
-
   const maybeNumber = Number(asString);
   let d;
   if (!Number.isNaN(maybeNumber) && maybeNumber > 1000000000) {
-    // likely epoch milliseconds
     d = new Date(maybeNumber);
   } else {
     d = new Date(asString);
   }
-
   if (Number.isNaN(d.getTime())) return asString;
   return d.toLocaleDateString();
 }
 
-// Layers for open / closed sites
-const openLayer = L.layerGroup();
-const closedLayer = L.layerGroup();
+// Layers for open / closed
+const openLayer = L.geoJSON(null, {
+  filter: (feature) => !isClosed(feature),
+  pointToLayer: (feature, latlng) =>
+    L.circleMarker(latlng, {
+      radius: 6,
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.9,
+      color: "#15803d",
+      fillColor: "#22c55e",
+    }),
+  onEachFeature: onEachFeature,
+});
 
-// Create popup HTML
-function buildPopupHtml(props, closed) {
+const closedLayer = L.geoJSON(null, {
+  filter: (feature) => isClosed(feature),
+  pointToLayer: (feature, latlng) =>
+    L.circleMarker(latlng, {
+      radius: 6,
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.9,
+      color: "#b91c1c",
+      fillColor: "#ef4444",
+    }),
+  onEachFeature: onEachFeature,
+});
+
+function onEachFeature(feature, layer) {
+  const props = feature.properties || {};
+
   const name =
-    props.PROJECT_NAME ||
-    props.PROJECT_NM ||
+    getField(props, ["PROJECT_NAME", "PROJECT_NM"]) ||
     "Unnamed recreation site";
 
-  const campsites = props.DEFINED_CAMPSITES ?? props.DFND_CAMP;
-  const location = props.SITE_LOCATION || props.SITE_LOC || "";
-  const description = props.SITE_DESCRIPTION || props.ST_DESC || "";
-  const directions = props.DRIVING_DIRECTIONS || props.DRV_DIRCTN || "";
+  const campsites = getField(props, ["DEFINED_CAMPSITES", "DFND_CAMP"]);
+  const location = getField(props, ["SITE_LOCATION", "SITE_LOC"]) || "";
+  const description = getField(props, ["SITE_DESCRIPTION", "ST_DESC"]) || "";
+  const directions = getField(props, ["DRIVING_DIRECTIONS", "DRV_DIRCTN"]) || "";
 
-  const closureType = props.CLOSURE_TYPE || props.CLOSR_TYPE || "";
-  const closureDate = props.CLOSURE_DATE || props.CLOSR_DT || "";
-  const closureComment = props.CLOSURE_COMMENT || props.CLOSR_COM || "";
+  const closed = isClosed(props);
+  const closureType = getField(props, ["CLOSURE_TYPE", "CLOSR_TYPE"]) || "";
+  const closureDate = getField(props, ["CLOSURE_DATE", "CLOSR_DT"]) || "";
+  const closureComment = getField(props, ["CLOSURE_COMMENT", "CLOSR_COM"]) || "";
 
   let statusHtml = closed
     ? "<strong>Status: CLOSED</strong><br/>"
     : "<strong>Status: Open (check latest info)</strong><br/>";
 
   if (closed) {
-    if (closureType) {
-      statusHtml += `Reason: ${closureType}<br/>`;
-    }
-    if (closureDate) {
-      statusHtml += `Since: ${formatClosureDate(closureDate)}<br/>`;
-    }
-    if (closureComment) {
-      statusHtml += `<em>${closureComment}</em><br/>`;
-    }
+    if (closureType) statusHtml += `Reason: ${closureType}<br/>`;
+    if (closureDate) statusHtml += `Since: ${formatClosureDate(closureDate)}<br/>`;
+    if (closureComment) statusHtml += `<em>${closureComment}</em><br/>`;
   }
 
   const campsiteHtml =
@@ -90,8 +123,9 @@ function buildPopupHtml(props, closed) {
     ? `<br/><strong>Directions:</strong> ${directions}`
     : "";
 
-  // Official links based on FOREST_FILE_ID (e.g. REC5810)
-  const forestId = props.FOREST_FILE_ID || props.F_FILE_ID;
+  const forestId =
+    getField(props, ["FOREST_FILE_ID", "F_FILE_ID"]) || "";
+
   let officialLinksHtml = "";
   if (forestId) {
     const oldUrl = `https://www.sitesandtrailsbc.ca/search/search-result.aspx?site=${forestId}&type=Site`;
@@ -104,7 +138,7 @@ function buildPopupHtml(props, closed) {
     `;
   }
 
-  return `
+  const popupHtml = `
     <strong>${name}</strong><br/>
     ${statusHtml}
     ${campsiteHtml}
@@ -113,11 +147,13 @@ function buildPopupHtml(props, closed) {
     ${dirHtml}
     ${officialLinksHtml}
   `;
+
+  layer.bindPopup(popupHtml);
 }
 
-// --- Load your uploaded GeoJSON and build markers from LAT/LON ---
+// --- Load GeoJSON using the relative path ---
 
-fetch("data/bc_rec_sites.geojson")
+fetch("data/FTEN_REC_DTAILS_CLOSURES_SV.geojson")
   .then((res) => {
     if (!res.ok) {
       console.error("Failed to load GeoJSON:", res.status, res.statusText);
@@ -131,68 +167,21 @@ fetch("data/bc_rec_sites.geojson")
     }
 
     console.log("Feature count:", data.features.length);
+    if (data.features.length > 0) {
+      console.log("Sample properties:", data.features[0].properties);
+    }
 
-    const bounds = L.latLngBounds();
+    openLayer.addData(data);
+    closedLayer.addData(data);
 
-    data.features.forEach((feature) => {
-      const props = getProps(feature);
-
-      let lat = props.LATITUDE;
-      let lng = props.LONGITUDE;
-
-      // Convert to numbers if strings
-      lat = typeof lat === "string" ? parseFloat(lat) : lat;
-      lng = typeof lng === "string" ? parseFloat(lng) : lng;
-
-      if (
-        typeof lat !== "number" ||
-        Number.isNaN(lat) ||
-        typeof lng !== "number" ||
-        Number.isNaN(lng)
-      ) {
-        return; // skip if coordinates missing
-      }
-
-      const closed = isClosed(props);
-
-      const style = closed
-        ? {
-            radius: 6,
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.9,
-            color: "#b91c1c",
-            fillColor: "#ef4444",
-          }
-        : {
-            radius: 6,
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.9,
-            color: "#15803d",
-            fillColor: "#22c55e",
-          };
-
-      const marker = L.circleMarker([lat, lng], style);
-      marker.bindPopup(buildPopupHtml(props, closed));
-
-      if (closed) {
-        closedLayer.addLayer(marker);
-      } else {
-        openLayer.addLayer(marker);
-      }
-
-      bounds.extend([lat, lng]);
-    });
-
-    // Add both layers and fit map
     openLayer.addTo(map);
     closedLayer.addTo(map);
 
-    if (bounds.isValid()) {
-      map.fitBounds(bounds, { padding: [20, 20] });
-    } else {
-      console.warn("No valid coordinates to fit bounds");
+    const group = L.featureGroup([openLayer, closedLayer]);
+    try {
+      map.fitBounds(group.getBounds(), { padding: [20, 20] });
+    } catch (e) {
+      console.warn("Could not fit bounds (maybe no features?)", e);
     }
   })
   .catch((err) => {
