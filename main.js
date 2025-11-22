@@ -151,9 +151,12 @@ function onEachFeature(feature, layer) {
   layer.bindPopup(popupHtml);
 }
 
-// --- Load GeoJSON using the file that actually has data ---
+// --- Load GeoJSON using the raw GitHub URL instead of Pages ---
 
-fetch("data/FTEN_REC_DTAILS_CLOSURES_SV.geojson")
+const DATA_URL =
+  "https://raw.githubusercontent.com/soldnerjumper/campspots-ca/main/data/FTEN_REC_DTAILS_CLOSURES_SV.geojson";
+
+fetch(DATA_URL)
   .then((res) => {
     if (!res.ok) {
       console.error("Failed to load GeoJSON:", res.status, res.statusText);
@@ -187,6 +190,7 @@ fetch("data/FTEN_REC_DTAILS_CLOSURES_SV.geojson")
   .catch((err) => {
     console.error("Error loading GeoJSON", err);
   });
+
 
 // --- Hook up the checkboxes ---
 
