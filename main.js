@@ -1,4 +1,4 @@
-// main.js — campsites only (DEFINED_CAMPSITES > 0), open vs closed
+// main.js — campsites only (DEFINED_CAMPSITES > 0), open vs closed, plus Crown land polygons
 
 // 1. Initialize the map centered roughly on BC
 const map = L.map("map").setView([53.7267, -127.6476], 5);
@@ -72,7 +72,7 @@ function formatClosureDate(value) {
   return d.toLocaleDateString();
 }
 
-// 6. Layers for open / closed campsites (no filters here; we filter before addData)
+// 6. Layers for open / closed campsites
 const openLayer = L.geoJSON(null, {
   pointToLayer: (feature, latlng) =>
     L.circleMarker(latlng, {
@@ -99,7 +99,24 @@ const closedLayer = L.geoJSON(null, {
   onEachFeature: onEachFeature,
 });
 
-// 7. Popup content
+// 7. Crown land polygons layer (initially empty, toggled via checkbox)
+const crownLayer = L.geoJSON(null, {
+  style: {
+    color: "#15803d",        // outline
+    weight: 1,
+    fillColor: "#22c55e",    // fill
+    fillOpacity: 0.15,       // very light so it doesn't overpower the map
+  },
+  onEachFeature: (feature, layer) => {
+    const props = feature.properties || {};
+    const name =
+      getField(props, ["NAME", "TITLE", "LABEL"]) ||
+      "Crown land (approximate)";
+    layer.bindPopup(`<strong>${name}</strong><br/>Crown land area (check local rules).`);
+  },
+});
+
+// 8. Popup content for campsites
 function onEachFeature(feature, layer) {
   const props = feature.properties || {};
 
@@ -167,20 +184,20 @@ function onEachFeature(feature, layer) {
   layer.bindPopup(popupHtml);
 }
 
-// 8. Load GeoJSON (using raw GitHub URL to avoid Pages truncation)
-const DATA_URL =
+// 9. Load Rec Sites GeoJSON (campsites only)
+const RECSITES_URL =
   "https://raw.githubusercontent.com/soldnerjumper/campspots-ca/main/data/FTEN_REC_DTAILS_CLOSURES_SV.geojson";
 
-fetch(DATA_URL)
+fetch(RECSITES_URL)
   .then((res) => {
     if (!res.ok) {
-      console.error("Failed to load GeoJSON:", res.status, res.statusText);
+      console.error("Failed to load Rec Sites GeoJSON:", res.status, res.statusText);
     }
     return res.json();
   })
   .then((data) => {
     if (!data || !Array.isArray(data.features)) {
-      console.error("Invalid GeoJSON structure", data);
+      console.error("Invalid Rec Sites GeoJSON structure", data);
       return;
     }
 
@@ -201,20 +218,49 @@ fetch(DATA_URL)
     openLayer.addTo(map);
     closedLayer.addTo(map);
 
-    const group = L.featureGroup([openLayer, closedLayer]);
+    const group = L.featureGroup([openLayer, closedLayer, crownLayer]);
     try {
       map.fitBounds(group.getBounds(), { padding: [20, 20] });
     } catch (e) {
-      console.warn("Could not fit bounds (maybe no features?)", e);
+      console.warn("Could not fit bounds (maybe no features yet?)", e);
     }
   })
   .catch((err) => {
-    console.error("Error loading GeoJSON", err);
+    console.error("Error loading Rec Sites GeoJSON", err);
   });
 
-// 9. Hook up the checkboxes
+// 10. Load Crown land polygons (optional; map still works if missing)
+const CROWN_URL =
+  "https://raw.githubusercontent.com/soldnerjumper/campspots-ca/main/data/bc_crown_land_camping.geojson";
+
+fetch(CROWN_URL)
+  .then((res) => {
+    if (!res.ok) {
+      console.warn("Crown land GeoJSON not found or failed to load:", res.status, res.statusText);
+      return null;
+    }
+    return res.json();
+  })
+  .then((data) => {
+    if (!data) return;
+    if (!data || !Array.isArray(data.features)) {
+      console.error("Invalid Crown land GeoJSON structure", data);
+      return;
+    }
+
+    console.log("Crown land features:", data.features.length);
+    crownLayer.addData(data);
+
+    // Don't add to map by default; controlled by checkbox
+  })
+  .catch((err) => {
+    console.warn("Error loading Crown land GeoJSON (optional layer)", err);
+  });
+
+// 11. Hook up the checkboxes
 const showOpenCheckbox = document.getElementById("showFree");
 const showClosedCheckbox = document.getElementById("showPaid");
+const showCrownCheckbox = document.getElementById("showCrown");
 
 if (showOpenCheckbox) {
   showOpenCheckbox.addEventListener("change", () => {
@@ -232,6 +278,16 @@ if (showClosedCheckbox) {
       map.addLayer(closedLayer);
     } else {
       map.removeLayer(closedLayer);
+    }
+  });
+}
+
+if (showCrownCheckbox) {
+  showCrownCheckbox.addEventListener("change", () => {
+    if (showCrownCheckbox.checked) {
+      map.addLayer(crownLayer);
+    } else {
+      map.removeLayer(crownLayer);
     }
   });
 }
