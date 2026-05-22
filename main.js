@@ -24,7 +24,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 // Keep raw government files if useful, but point the app at the clean working layer.
 
 const DATA_URLS = {
-  recSites: "data/bc_rec_sites.geojson",
+  recSites: "data/FTEN_REC_DTAILS_CLOSURES_SV.geojson",
   mosaicSites: "data/mosaic_sites.geojson",
   crownLand: "data/bc_crown_land.geojson",
 };
