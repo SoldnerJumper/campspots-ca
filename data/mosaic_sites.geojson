@@ -1,0 +1,384 @@
+{
+  "type": "FeatureCollection",
+  "name": "mosaic_sites",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Caycuse Campsite",
+        "region": "South Island",
+        "status": "Open",
+        "open_to": "Monday, October 14, 2024",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/Caycuse2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "medium",
+        "notes": "Approximate point near Caycuse on the south shore of Cowichan Lake; refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -124.3683,
+          48.8886
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Deadwood Campsite",
+        "region": "South Island",
+        "status": "Closed",
+        "open_to": "",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/Deadwood2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "low",
+        "notes": "Approximate point in the Nanaimo Lakes / First Lake campground cluster; refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -124.154,
+          49.098
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gooseneck Lake Campsite",
+        "region": "North Island",
+        "status": "Closed",
+        "open_to": "",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/Gooseneck2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "low",
+        "notes": "Approximate point west of Campbell River; refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -125.508,
+          49.994
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Heather Campsite",
+        "region": "South Island",
+        "status": "Closed",
+        "open_to": "",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/Heather2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "low",
+        "notes": "Approximate point in the Cowichan / Nitinat access area; refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -124.472,
+          48.812
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kissinger Campsite",
+        "region": "South Island",
+        "status": "Closed",
+        "open_to": "",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/Kissinger2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "low",
+        "notes": "Approximate point near Kissinger Lake on the way to Nitinaht Lake; refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -124.514,
+          48.794
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Little Shaw Campsite",
+        "region": "South Island",
+        "status": "Closed",
+        "open_to": "",
+        "reservations_url": "https://lakecowichancamping.com/",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/LittleShaw2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground_walk_in",
+        "reservation_required": true,
+        "coordinate_confidence": "low",
+        "notes": "Approximate point; likely walk-in/tent-oriented site. Refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -124.48,
+          48.827
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Macktush Campsite",
+        "region": "Central Island",
+        "status": "Closed",
+        "open_to": "",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/Macktush2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "low",
+        "notes": "Approximate point near Alberni Inlet, west of Port Alberni; refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -124.958,
+          49.105
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Old Mill Campsite",
+        "region": "South Island",
+        "status": "Open",
+        "open_to": "Monday, October 14, 2024",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/OldMill2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "low",
+        "notes": "Approximate point in the Nanaimo Lakes / First Lake campground cluster; refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -124.162,
+          49.097
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Riverside Campsite",
+        "region": "South Island",
+        "status": "Open",
+        "open_to": "Monday, October 14, 2024",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/Riverside2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "low",
+        "notes": "Approximate point in the Nanaimo Lakes campground cluster; refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -124.143,
+          49.103
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Upper Campbell Reservoir",
+        "region": "North Island",
+        "status": "Open",
+        "open_to": "",
+        "reservations_url": "https://www.bchydro.com/community/recreation_areas/strathcona_dam.html",
+        "map_url": "",
+        "phone": "",
+        "email": "info@mosaiccampsites.com",
+        "cost": "free",
+        "camp_type": "free_formal_campground",
+        "reservation_required": false,
+        "coordinate_confidence": "high",
+        "notes": "BC Hydro recreation area / campground. First-come-first-served; verify current rules before travelling.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -125.5807846,
+          49.9648441
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Willington Point Campsite",
+        "region": "North Island",
+        "status": "Open",
+        "open_to": "Sunday, October 6, 2024",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/Willington2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "low",
+        "notes": "Approximate point near Upper Quinsam Lake, west of Campbell River; refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -125.543,
+          49.929
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Windy Point Campsite",
+        "region": "South Island",
+        "status": "Open",
+        "open_to": "Monday, October 14, 2024",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/WindyPoint2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "medium",
+        "notes": "Approximate longitude; located on First Lake in the Nanaimo Lakes campground cluster. Refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -124.15,
+          49.0956816
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Wokas Lake Campsite",
+        "region": "North Island",
+        "status": "Open",
+        "open_to": "Sunday, October 6, 2024",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/pdfs/maps/Wokas2021.pdf",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "high",
+        "notes": "Coordinates from OpenCampingMap / OSM. Verify current Mosaic operating status before travelling.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -125.5446101,
+          49.9007555
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ʕaʔuk ʔaama k̓anis/Loon Lake Campsite",
+        "region": "Central Island",
+        "status": "Open",
+        "open_to": "Monday, October 14, 2024",
+        "reservations_url": "https://mosaiccampsites.com",
+        "map_url": "https://mosaiccampsites.com/assets/images/maps/LoonLake2022.png",
+        "phone": "250.714.9525",
+        "email": "info@mosaiccampsites.com",
+        "cost": "paid",
+        "camp_type": "forestry_campground",
+        "reservation_required": true,
+        "coordinate_confidence": "low",
+        "notes": "Approximate point near Loon Lake east of Port Alberni; refine using official campground map.",
+        "source": "Mosaic/BC Hydro campsite list; coordinates are mixed verified/approximate",
+        "verify_before_travel": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -124.69,
+          49.211
+        ]
+      }
+    }
+  ]
+}
