@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>CampSpots.ca – BC Recreation Sites</title>
+  <title>CampSpots.ca – Vancouver Island Outdoor Map</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Leaflet CSS -->
+  <meta
+    name="description"
+    content="A practical Vancouver Island outdoor map for camping, recreation sites, crown land context, van life, and future cell service planning."
+  />
+
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -14,48 +18,54 @@
     crossorigin=""
   />
 
-  <!-- Your styles -->
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <header>
     <h1>CampSpots.ca</h1>
-    <p>BC Recreation Sites (campsites only)</p>
+    <p>Practical camping and outdoor travel planning for Vancouver Island.</p>
 
-    <div id="filters">
+    <div id="filters" aria-label="Map filters">
       <label>
-        <input type="checkbox" id="showFree" checked />
-        Show open sites
+        <input type="checkbox" id="showOpenRecSites" checked />
+        Open rec sites
       </label>
+
       <label>
-        <input type="checkbox" id="showPaid" checked />
-        Show closed sites
+        <input type="checkbox" id="showClosedRecSites" />
+        Closed rec sites
       </label>
+
       <label>
-        <input type="checkbox" id="showCrown" />
-        Show Crown land (approx.)
+        <input type="checkbox" id="showMosaicSites" checked />
+        Mosaic sites
+      </label>
+
+      <label>
+        <input type="checkbox" id="showCrownLand" />
+        Crown land context
       </label>
     </div>
   </header>
 
   <main>
-    <div id="map"></div>
+    <div id="map" aria-label="CampSpots.ca map"></div>
   </main>
 
   <footer>
     <small>
-      Data: BC Recreation Sites – Details &amp; Closures. Always verify fees and access rules on the official site links in each popup.
+      Data sources may include BC Recreation Sites, Mosaic Forest Management, and public land datasets.
+      Always verify fees, closures, access, fire bans, and local rules with official sources before travelling or camping.
     </small>
   </footer>
 
-  <!-- Leaflet JS -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
 
-  <!-- Your map logic -->
   <script src="main.js"></script>
 </body>
 </html>
